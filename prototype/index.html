@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB 18 · Case B — AI Notes · Prototype 3 Options (Nguyễn Văn Sơn 2A202602744)</title>
+<meta name="description" content="Micro-prototype Day 18: ba Solution Options cho Case B AI Notes — Nguyễn Văn Sơn, 2A202602744, nhóm Ca Khô.">
+<link rel="stylesheet" href="assets/base.css">
+</head>
+<body>
+
+<!-- ============ PROTOTYPE BAR (chỉ dùng khi demo/test, không thuộc sản phẩm) ============ -->
+<div class="pbar" id="pbar"></div>
+
+<!-- ============ NỘI DUNG ============ -->
+<div class="wrap">
+  <div class="cols">
+    <div id="lesson"></div>
+    <div id="side"></div>
+  </div>
+
+  <div class="foot">
+    <b>Prototype Day 18 — Case B: AI Notes (Personal Learning Notes).</b>
+    Nội dung bài học, dấu vết học tập và câu hỏi kiểm tra lấy từ evidence Day 17 (phỏng vấn P07 — Pipeline CPU, ảnh chụp không gắn vị trí, sáng mai phải xem lại video 35 phút).<br>
+    Bản này là micro-prototype để test, chỉ có 2–3 trạng thái quanh một tương tác trọng yếu — không phải sản phẩm hoàn chỉnh.
+    Mở trực tiếp bằng <kbd>file://</kbd>, không cần máy chủ.
+  </div>
+</div>
+
+<!-- ============ FACILITATOR LOG ============ -->
+<div id="scrim"></div>
+<aside id="logdrawer" aria-label="Facilitator log">
+  <div class="log-h">
+    <span class="t">Facilitator log</span>
+    <span class="c" id="logcount">0 sự kiện</span>
+    <button class="pbtn" data-act="logclose">Đóng</button>
+  </div>
+  <div class="log-b" id="logbody"></div>
+  <div class="log-f">
+    <button class="btn sm" data-act="csvcopy">Copy dạng CSV</button>
+    <button class="btn sm sec" data-act="csvcopy2">Tải file .csv</button>
+    <button class="btn sm ghost" data-act="csvclear">Xoá log</button>
+  </div>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/options.js"></script>
+<script src="assets/app.js"></script>
+<script>
+/* nút CSV trong drawer — để riêng khỏi app.js cho gọn */
+document.addEventListener('click', function (e) {
+  var el = e.target.closest('[data-act]');
+  if (!el) return;
+  var a = el.dataset.act;
+  var csv = window.LOG.csv();
+
+  if (a === 'csvcopy' || a === 'csvcopy2') {
+    if (a === 'csvcopy') {
+      var done = function () { window.__toast && window.__toast('Đã chép CSV vào clipboard.'); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(csv).then(done, function () { fallback(csv, done); });
+      } else fallback(csv, done);
+    } else {
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      var a2 = document.createElement('a');
+      a2.href = URL.createObjectURL(blob);
+      a2.download = 'lab18_log_' + window.S.t + '_' + window.S.m + '_' + window.S.o + '.csv';
+      document.body.appendChild(a2); a2.click(); document.body.removeChild(a2);
+      window.__toast && window.__toast('Đã tải file CSV.');
+    }
+    window.LOG.event('csv-export', csv.split('\n').length - 2 + ' dòng');
+    return;
+  }
+  if (a === 'csvclear') {
+    window.LOG.rows = []; window.LOG.sessT0 = Date.now();
+    window.LOG.event('log-cleared', '');
+    document.getElementById('logbody').innerHTML = '<div class="empty">Chưa có sự kiện nào.</div>';
+    document.getElementById('logcount').textContent = '1 sự kiện';
+  }
+});
+function fallback(txt, cb) {
+  var ta = document.createElement('textarea');
+  ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); cb(); } catch (e) { window.__toast && window.__toast('Không chép được — dùng nút Tải file .csv.'); }
+  document.body.removeChild(ta);
+}
+</script>
+</body>
+</html>
